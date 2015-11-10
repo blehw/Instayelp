@@ -3,11 +3,19 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-CONSUMER_KEY = "4UflM-LI7bHtQCXO1mKyBA"
-CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
-TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
-TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
+API_HOST = 'api.yelp.com'
+SEARCH_PATH = '/v2/search/'
 
-@app.route("/<tag")
-def search(tag=""):
-    url = """
+@app.route("/tacos")
+def search(tag="tacos"):
+
+    url_params = {
+    'tag':tag.replace(' ', '+'),
+    }
+
+    return module.request(API_HOST, SEARCH_PATH, url_params=url_params)
+
+if __name__=="__main__":
+    app.debug=True
+    app.secret_key = "My name is Ted"
+    app.run(host='0.0.0.0',port=8000)

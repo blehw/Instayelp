@@ -7,6 +7,11 @@ import urllib2
 
 import oauth2
 
+CONSUMER_KEY = "4UflM-LI7bHtQCXO1mKyBA"
+CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
+TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
+TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
+
 #thanks to yelp documentation for this
 def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.

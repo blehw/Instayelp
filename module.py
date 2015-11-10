@@ -7,6 +7,13 @@ import urllib2
 
 import oauth2
 
+API_HOST = 'api.yelp.com'
+DEFAULT_TERM = 'dinner'
+DEFAULT_LOCATION = 'San Francisco, CA'
+SEARCH_LIMIT = 3
+SEARCH_PATH = '/v2/search/'
+BUSINESS_PATH = '/v2/business/'
+
 CONSUMER_KEY = "4UflM-LI7bHtQCXO1mKyBA"
 CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"

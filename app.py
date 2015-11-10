@@ -21,7 +21,7 @@ CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
 
-def request(host, path, url_params=None):
+def request(host, path, params):
     """Prepares OAuth authentication and sends the request to the API.
     Args:
         host (str): The domain host of the API.
@@ -32,11 +32,11 @@ def request(host, path, url_params=None):
     Raises:
         urllib2.HTTPError: An error occurs from the HTTP request.
     """
-    url_params = url_params or {}
+    url_params = params
     url = 'https://{0}{1}?'.format(host, urllib.quote(path.encode('utf8')))
 
     consumer = oauth2.Consumer(CONSUMER_KEY, CONSUMER_SECRET)
-    oauth_request = oauth2.Request(method="GET", url=url, parameters=url_params)
+    oauth_request = oauth2.Request(method="GET", url=url, parameters=params)
 
     oauth_request.update(
         {
@@ -71,12 +71,12 @@ def search(term=DEFAULT_TERM, location=DEFAULT_LOCATION):
         dict: The JSON response from the request.
     """
     
-    url_params = {
+    params = {
         'term': term.replace(' ', '+'),
         'location': location.replace(' ', '+'),
         'limit': SEARCH_LIMIT
     }
-    return request(API_HOST, SEARCH_PATH, url_params=url_params)
+    return request(API_HOST, SEARCH_PATH, params)
 
 if __name__=="__main__":
     app.debug=True

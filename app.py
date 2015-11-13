@@ -21,22 +21,25 @@ CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
 
-def request(host, path, params):
+def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
+
     Args:
         host (str): The domain host of the API.
         path (str): The path of the API after the domain.
         url_params (dict): An optional set of query parameters in the request.
+
     Returns:
         dict: The JSON response from the request.
+
     Raises:
         urllib2.HTTPError: An error occurs from the HTTP request.
     """
-    url_params = params
+    url_params = url_params or {}
     url = 'https://{0}{1}?'.format(host, urllib.quote(path.encode('utf8')))
 
     consumer = oauth2.Consumer(CONSUMER_KEY, CONSUMER_SECRET)
-    oauth_request = oauth2.Request(method="GET", url=url, parameters=params)
+    oauth_request = oauth2.Request(method="GET", url=url, parameters=url_params)
 
     oauth_request.update(
         {
@@ -49,7 +52,7 @@ def request(host, path, params):
     token = oauth2.Token(TOKEN, TOKEN_SECRET)
     oauth_request.sign_request(oauth2.SignatureMethod_HMAC_SHA1(), consumer, token)
     signed_url = oauth_request.to_url()
-    
+
     print u'Querying {0} ...'.format(url)
 
     conn = urllib2.urlopen(signed_url, None)
@@ -62,21 +65,24 @@ def request(host, path, params):
 
 
 @app.route("/tacos")
-def search(term=DEFAULT_TERM, location=DEFAULT_LOCATION):
+
+def search(term, location):
     """Query the Search API by a search term and location.
+
     Args:
         term (str): The search term passed to the API.
         location (str): The search location passed to the API.
+
     Returns:
         dict: The JSON response from the request.
     """
-    
-    params = {
+
+    url_params = {
         'term': term.replace(' ', '+'),
         'location': location.replace(' ', '+'),
         'limit': SEARCH_LIMIT
     }
-    return request(API_HOST, SEARCH_PATH, params)
+    return request(API_HOST, SEARCH_PATH, url_params=url_params)
 
 if __name__=="__main__":
     app.debug=True

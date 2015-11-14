@@ -1,0 +1,12 @@
+<!--{% for u in r %}
+{{u}} : {{r[u]}}
+<br>
+{% endfor %}-->
+
+Name of Restaurant: {{r['name']}}
+<br>
+Rating : <img src={{r['rating_img_url']}} alt="rating">
+<br>
+Phone: {{r['phone']}}
+<br>
+<a href={{r['url']}}>Yelp Site</a>

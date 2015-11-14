@@ -2,8 +2,8 @@ from instagram.client import InstagramAPI
 
 'needs pip install python-instagram'
 
-CID = 'd1ea621e34594ddba981f42614d8b0fc'
-CIDS = '3ebafbbe4b224811b18d6823f89fba3e'
+CID = '1500207b59d34a87a53120d33e56c041'
+CIDS = '41ede89cba7e44ecb604fce95f444672'
 
 
 con = InstagramAPI(client_id = CID, client_secret = CIDS)

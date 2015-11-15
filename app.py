@@ -25,9 +25,6 @@ CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
 
-<<<<<<< HEAD
-=======
-
 ###Instagram Keys
 
 CONFIG = {
@@ -37,8 +34,7 @@ CONFIG = {
 }
 api = client.InstagramAPI(**CONFIG)
 
->>>>>>> refs/remotes/origin/master
-def request(host, path, url_params=None):
+def requestf(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
     Args:
         host (str): The domain host of the API.
@@ -110,23 +106,20 @@ def get_business(business_id):
 
 @app.route("/", methods=["GET","POST"])
 def index():
-        """
-        Main Page of Website
+	"""
+	Main Page of Website
  	Prompts the user to chose a food and location
- 	"""
-        
-	##if request.method == "GET":
-        ##	return render_template("home.html")
-    if request.method=="POST":
-	button = request.form['button']
-	food = request.form['type']
-	location =request.form['location']
-	if button=="Find":
-	    return query_api(term=food, location=location);
-	else:
-	    return "bye"
-    else:
-	return render_template("home.html")
+	"""
+	if request.method=="POST":
+		button = request.form['button']
+		food = request.form['type']
+		location =request.form['location']
+		if button=="Find":
+			return query_api(term=food, location=location);
+		else:
+		    return "bye"
+   	else:
+   		return render_template("home.html")
 
 @app.route("/<term>/<location>")
 def query_api(term="tacos", location="brooklyn"):
@@ -173,25 +166,6 @@ CONFIG = {
 api = client.InstagramAPI(**CONFIG)
 
 @app.route('/instagram')
-<<<<<<< HEAD
- def instagram():
-    if 'insta_access_token' not in session:
-        return redirect('/conn')
-
-@app.route('/oauth')
-def oauth(): 
-    access_token = api.exchange_code_for_access_token('4a3aa59b3fa54a399b75f66438bcf456')
-    return access_token
-
-def tag_search(hashtag):
-    """Searches instagram for photos using certain hashtags. 
-    inputs 
-      tag (str): hashtag you want to search 
-    outputs 
-      content (str): all the photos from the photos array
-    """
-    access_token = oauth()
-=======
 def instagram():
     if 'insta_access_token' not in session:
         return redirect('/conn')
@@ -220,7 +194,6 @@ def oauth():
 @app.route('/tag_search')
 def tag_search(hashtag):
     access_token = session['insta_access_token']
->>>>>>> refs/remotes/origin/master
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
     tag_search, next_tag = api.tag_search(q = hashtag)
     tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
@@ -249,11 +222,6 @@ def location_search(longi, lati, dist):
         pics.append('<img src="%s"/>' % media.get_standard_resolution_url())
     photos += ''.join(pics)
     return photos
-
-if __name__=="__main__":
-    app.debug=True
-    app.run(host='0.0.0.0',port=8000)
-
 
 
 if __name__=="__main__":

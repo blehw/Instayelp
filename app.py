@@ -5,7 +5,7 @@ import sys
 import urllib
 import oauth2
 
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 
 app = Flask(__name__)
 
@@ -20,6 +20,8 @@ CONSUMER_KEY = "4UflM-LI7bHtQCXO1mKyBA"
 CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
+
+message = ""
 
 def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
@@ -106,14 +108,20 @@ def query_api(term="tacos", location="brooklyn"):
         term (str): The search term to query.
         location (str): The location of the business to query.
     """
+    message = ""
+    if "business_at_location" not in session:
+    	session['business_at_location'] = True
+	if not session['business_at_location']:
+		message = "No business at this location"
+		session["business_at_location"] = True
     response = search(term, location)
-
+	#response = search("pizza", "krpslpo");
     businesses = response.get('businesses')
-
+	
     if not businesses:
         print u'No businesses for {0} in {1} found.'.format(term, location)
-        return
-
+        session["bussiness_at_location"] = False
+        return render_template("tacos.html")
     business_id = businesses[0]['id']
 
     print u'{0} businesses found, querying business info ' \
@@ -122,8 +130,9 @@ def query_api(term="tacos", location="brooklyn"):
     response = get_business(business_id)
 
     print u'Result for business "{0}" found:'.format(business_id)
-    return render_template("tacos.html", r=response)
+    return render_template("tacos.html", r=response, m=message)
 
 if __name__=="__main__":
+    app.secret_key = "My name is Taco"
     app.debug=True
     app.run(host='0.0.0.0',port=8000)

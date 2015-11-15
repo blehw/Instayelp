@@ -2,11 +2,15 @@
 {{u}} : {{r[u]}}
 <br>
 {% endfor %}-->
-
+<!DOCTYPE HTML>
+<HTML>
 Name of Restaurant: {{r['name']}}
 <br>
 Rating : <img src={{r['rating_img_url']}} alt="rating">
 <br>
 Phone: {{r['phone']}}
 <br>
+Address: {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
+<br>
 <a href={{r['url']}}>Yelp Site</a>
+</HTML>

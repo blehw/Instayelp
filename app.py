@@ -109,6 +109,15 @@ def get_business(business_id):
     business_path = BUSINESS_PATH + business_id
 
     return request(API_HOST, business_path)
+    
+@app.route("/", methods=["GET","POST"])
+def index():
+	"""
+	Main Page of Website
+	Prompts the user to chose a food and location
+	"""
+	return render_template("home.html")
+	
 
 @app.route("/<term>/<location>")
 def query_api(term="tacos", location="brooklyn"):

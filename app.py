@@ -4,6 +4,7 @@ import pprint
 import sys
 import urllib
 import oauth2
+from instagram import client, subscriptions
 
 from flask import Flask, render_template
 
@@ -20,6 +21,15 @@ CONSUMER_KEY = "4UflM-LI7bHtQCXO1mKyBA"
 CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
+
+###Instagram Keys
+
+CONFIG = {
+    'client_id': '1500207b59d34a87a53120d33e56c041',
+    'client_secret': '41ede89cba7e44ecb604fce95f444672',
+    'redirect_uri': 'http://localhost:8000/oauth',
+}
+unauthenticated_api = client.InstagramAPI(**CONFIG)
 
 def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
@@ -123,6 +133,37 @@ def query_api(term="tacos", location="brooklyn"):
 
     print u'Result for business "{0}" found:'.format(business_id)
     return render_template("tacos.html", r=response)
+
+#Instagram
+
+@app.route('/instagram')
+def instagram():
+    url = unauthenticated_api.get_authorize_url(scope=['likes', 'comments'])
+    return '<a href = "%s"> Connect with Instagram </a>' % url
+
+@app.route('/oauth')
+def oauth_callback():
+    code = request.GET.get("code")
+    access_token, user_info = unauthenticated_api.exchange_code_for_access_token(code)
+    if not access_token:
+        return 'Could not get access token'
+    api = client.InstagramAPI(access_token = access_token, client_secret=CONFIG['client_secret'])
+    request.session['access_token'] = access_token
+    redirect('/tag_search')
+
+@app.route('/tag_search')
+def tag_search():
+    access_token = request.session['access_token']
+    api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
+    tag_search, next_tag = api.tag_search(q = "taco")
+    tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
+    photos = []
+    for tag_media in tag_recent_media:
+        photos.append('<img src="%s"/>' % tag_media.get_standard_resolution_url())
+    content += ''.join(photos)
+    return content
+
+
 
 if __name__=="__main__":
     app.debug=True

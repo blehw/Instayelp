@@ -4,9 +4,10 @@ import pprint
 import sys
 import urllib
 import oauth2
+
 from instagram import client, subscriptions
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request, session, redirect
 
 app = Flask(__name__)
 
@@ -29,7 +30,7 @@ CONFIG = {
     'client_secret': '41ede89cba7e44ecb604fce95f444672',
     'redirect_uri': 'http://localhost:8000/oauth',
 }
-unauthenticated_api = client.InstagramAPI(**CONFIG)
+api = client.InstagramAPI(**CONFIG)
 
 def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
@@ -138,22 +139,33 @@ def query_api(term="tacos", location="brooklyn"):
 
 @app.route('/instagram')
 def instagram():
-    url = unauthenticated_api.get_authorize_url(scope=['likes', 'comments'])
-    return '<a href = "%s"> Connect with Instagram </a>' % url
+    if 'insta_access_token' not in session:
+        return redirect('/conn')
+
+@app.route('/conn')
+def main():
+    url = api.get_authorize_url(scope=["likes", "comments"])
+    return redirect(url)
 
 @app.route('/oauth')
-def oauth_callback():
-    code = request.GET.get("code")
-    access_token, user_info = unauthenticated_api.exchange_code_for_access_token(code)
-    if not access_token:
-        return 'Could not get access token'
-    api = client.InstagramAPI(access_token = access_token, client_secret=CONFIG['client_secret'])
-    request.session['access_token'] = access_token
-    redirect('/tag_search')
+def oauth():
+    code = request.args.get("token")
+    return "done"
+    if code:
+        access_token, user = api.exchange_code_for_access_token(code)
+        if not access_token:
+            return 'no access token'
+        app.logger.debug('got an access token')
+        app.logger.debug(access_token)
+
+        session['insta_access_token'] = access_token
+        session['insta_user'] = user
+        return redirect('/tag_search')
+
 
 @app.route('/tag_search')
 def tag_search():
-    access_token = request.session['access_token']
+    access_token = session['insta_access_token']
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
     tag_search, next_tag = api.tag_search(q = "taco")
     tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)

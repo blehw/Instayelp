@@ -4,10 +4,9 @@ import pprint
 import sys
 import urllib
 import oauth2
-
 from instagram import client, subscriptions
 
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -23,7 +22,6 @@ CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
 
-
 ###Instagram Keys
 
 CONFIG = {
@@ -31,7 +29,7 @@ CONFIG = {
     'client_secret': '41ede89cba7e44ecb604fce95f444672',
     'redirect_uri': 'http://localhost:8000/oauth',
 }
-api = client.InstagramAPI(**CONFIG)
+unauthenticated_api = client.InstagramAPI(**CONFIG)
 
 def request(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
@@ -118,20 +116,14 @@ def query_api(term="tacos", location="brooklyn"):
         term (str): The search term to query.
         location (str): The location of the business to query.
     """
-    message = ""
-    if "business_at_location" not in session:
-    	session['business_at_location'] = True
-	if not session['business_at_location']:
-		message = "No business at this location"
-		session["business_at_location"] = True
     response = search(term, location)
-	#response = search("pizza", "krpslpo");
+
     businesses = response.get('businesses')
-	
+
     if not businesses:
         print u'No businesses for {0} in {1} found.'.format(term, location)
-        session["bussiness_at_location"] = False
-        return render_template("tacos.html")
+        return
+
     business_id = businesses[0]['id']
 
     print u'{0} businesses found, querying business info ' \
@@ -140,39 +132,28 @@ def query_api(term="tacos", location="brooklyn"):
     response = get_business(business_id)
 
     print u'Result for business "{0}" found:'.format(business_id)
-    return render_template("tacos.html", r=response, m=message)
+    return render_template("tacos.html", r=response)
 
 #Instagram
 
 @app.route('/instagram')
 def instagram():
-    if 'insta_access_token' not in session:
-        return redirect('/conn')
-
-@app.route('/conn')
-def main():
-    url = api.get_authorize_url(scope=["likes", "comments"])
-    return redirect(url)
+    url = unauthenticated_api.get_authorize_url(scope=['likes', 'comments'])
+    return '<a href = "%s"> Connect with Instagram </a>' % url
 
 @app.route('/oauth')
-def oauth():
-    code = request.args.get("token")
-    return "done"
-    if code:
-        access_token, user = api.exchange_code_for_access_token(code)
-        if not access_token:
-            return 'no access token'
-        app.logger.debug('got an access token')
-        app.logger.debug(access_token)
-
-        session['insta_access_token'] = access_token
-        session['insta_user'] = user
-        return redirect('/tag_search')
-
+def oauth_callback():
+    code = request.GET.get("code")
+    access_token, user_info = unauthenticated_api.exchange_code_for_access_token(code)
+    if not access_token:
+        return 'Could not get access token'
+    api = client.InstagramAPI(access_token = access_token, client_secret=CONFIG['client_secret'])
+    request.session['access_token'] = access_token
+    redirect('/tag_search')
 
 @app.route('/tag_search')
 def tag_search():
-    access_token = session['insta_access_token']
+    access_token = request.session['access_token']
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
     tag_search, next_tag = api.tag_search(q = "taco")
     tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
@@ -185,6 +166,5 @@ def tag_search():
 
 
 if __name__=="__main__":
-    app.secret_key = "My name is Taco"
     app.debug=True
     app.run(host='0.0.0.0',port=8000)

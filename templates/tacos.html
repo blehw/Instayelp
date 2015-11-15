@@ -4,6 +4,8 @@
 {% endfor %}-->
 <!DOCTYPE HTML>
 <HTML>
+{{m}}
+<br>
 Name of Restaurant: {{r['name']}}
 <br>
 Rating : <img src={{r['rating_img_url']}} alt="rating">
@@ -13,4 +15,10 @@ Phone: {{r['phone']}}
 Address: {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
 <br>
 <a href={{r['url']}}>Yelp Site</a>
+<br>
+<form method = "POST">
+	<div class = "containor">
+		<input type = "submit" class="btn btn-smll btn-primary btn-block" name ="button" value="New">
+	</div>
+</form>
 </HTML>

@@ -1,8 +1,10 @@
 # InstayelpFoodPorn
 Combining the best of Instagram and Yelp to give you what you need in your life: more food porn.
 
+To run, you must pip install instagram-python, be logged into an Instagram account on Instagram.com, and click verify on the home page.
 
-<b>DISCLAIMER</b> We created InstaYelpFoodPorn with the noble goal of providing the best food porn Instagram has to offer. Unfortunately, the internet is not a nice place. As a result, not all the porn InstaYelp picks up is food related. Tread carefully - you have been warned.
+
+<b>DISCLAIMER</b> We created InstaYelpFoodPorn with the noble goal of providing the best food pictures Instagram has to offer. Unfortunately, the internet is not a nice place. As a result, not all the pictures InstaYelp picks up is food related. Tread carefully - you have been warned.
 
 <table>
 <tr>

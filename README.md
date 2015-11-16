@@ -9,7 +9,7 @@ Combining the best of Instagram and Yelp to give you what you need in your life:
 <th>Members</th><th>Role</th>
 </tr>
 <tr>
-<td>Winton Yee</td><td>Leader/UX/Yelp API<td>
+<td>Winton Yee</td><td>Leader/UX/Yelp API</td>
 </tr>
 <tr>
 <td>Wayez Chowdhury</td><td>Backend/Yelp API</td>

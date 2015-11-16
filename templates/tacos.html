@@ -12,6 +12,8 @@
 <b>Address:</b> {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
 <br>
 <a href={{r['url']}}>Yelp Site</a>
+<p>
+<a href='/'>Return to homepage</a>
 <h2>Some deliciously random Instagram posts tagged with '{{t}}'</h2>
 {% for u in c %}
 <br><img src={{u}}>

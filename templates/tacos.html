@@ -1,19 +1,23 @@
-<!--{% for u in r %}
-{{u}} : {{r[u]}}
-<br>
-{% endfor %}-->
 <!DOCTYPE HTML>
 <HTML>
-{{m}}
+<center>
+<h1>Top result for '{{t}}' in '{{l}}':</h1>
 <br>
-Name of Restaurant: {{r['name']}}
+<b>Name of Restaurant:</b> {{r['name']}}
 <br>
-Rating : <img src={{r['rating_img_url']}} alt="rating">
+<b>Rating:</b> <img src={{r['rating_img_url']}} alt="rating">
 <br>
-Phone: {{r['phone']}}
+<b>Phone:</b> {{r['phone']}}
 <br>
-Address: {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
+<b>Address:</b> {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
 <br>
 <a href={{r['url']}}>Yelp Site</a>
 <br>
+<p>
+<a href='/'>Return to homepage</a>
+<h2>Some deliciously random Instagram posts tagged with '{{t}}'</h2>
+{% for u in c %}
+<br><img src={{u}}>
+{% endfor %}
+</center>
 </HTML>

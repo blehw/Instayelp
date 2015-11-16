@@ -26,14 +26,6 @@ CONSUMER_SECRET = "xVusSoHSNz8ryufxsgWqCJmqv-c"
 TOKEN = "M0JTrZ1-LTJHy9QKcCoKUVdxKi8p2WpW"
 TOKEN_SECRET = "-cIRMwr9TDs17AO4PahF2HB2bDM"
 
-###Instagram Keys
-
-CONFIG = {
-    'client_id': '1500207b59d34a87a53120d33e56c041',
-    'client_secret': '41ede89cba7e44ecb604fce95f444672',
-    'redirect_uri': 'http://localhost:8000/oauth',
-}
-api = client.InstagramAPI(**CONFIG)
 
 def requestf(host, path, url_params=None):
     """Prepares OAuth authentication and sends the request to the API.
@@ -123,13 +115,15 @@ def index():
 		else:
 		    return "bye"
    	else:
-   		return render_template("home.html")
+            return render_template("home.html")
 
-@app.route("/<term>/<location>", methods=["GET","POST"])
+
+@app.route("/<term>/<location>")
+
 def query_api(term="tacos", location="brooklyn"):
     """Queries the API by the input values from the user.
     Args:
-        term (str): The search term to query.
+        term (str): The search term to query. Will return JSON from Instagram of posts tagged with this term.
         location (str): The location of the business to query.
     """
     if "business_at_location" not in session:
@@ -152,25 +146,16 @@ def query_api(term="tacos", location="brooklyn"):
 		'for the top result "{1}" ...'.format(len(businesses), business_id)
     	response = get_business(business_id)
     	print u'Result for business "{0}" found:'.format(business_id)
-    	return render_template("tacos.html", r=response, m="")
-    else:
-    	print "duck"
-    	response = search(term, location)
-    	businesses = response.get('businesses')
-    	length = len(businesses)
-    	rand = random.randint(0, length - 1)
-    	business_id = businesses[rand]['id']
-    	if not businesses:
-    		print u'No businesses for {0} in {1} found.'.format(term, location)
-    		session["bussiness_at_location"] = False
-    		return render_template("tacos.html")
-		length =len(businesses)
-		rand = random.randint(0, length - 1)
-		print u'{0} businesses found, querying business info ' \
-		'for the top result "{1}" ...'.format(len(businesses), business_id )
-    	response = get_business(business_id )
-    	print u'Result for bussiness "{0}" found:'.format(business_id )
-    	return render_template("tacos.html", r=response, m="")
+    	#Instagram part
+    	access_token = session['insta_access_token']
+    	api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
+    	tag_search, next_tag = api.tag_search(q = term)
+    	tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
+    	photos = []
+    	for tag_media in tag_recent_media:
+    		photos.append(tag_media.get_standard_resolution_url())
+    	print term
+    	return render_template("tacos.html", r=response, m="", c=photos, t=term, l=location)
 
 
 def query_api2(term="tacos", location = "brooklyn"):
@@ -190,76 +175,52 @@ def query_api2(term="tacos", location = "brooklyn"):
 	'for the top result "{1}" ...'.format(len(businesses), business_id )
 	response = get_business(business_id )
 	print u'Result for bussiness "{0}" found:'.format(business_id )
-	return render_template("tacos.html", r=response, m="")
+	access_token = session['insta_access_token']
+	api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
+	tag_search, next_tag = api.tag_search(q = term)
+	tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
+	photos = []
+	for tag_media in tag_recent_media:
+		photos.append(tag_media.get_standard_resolution_url())
+	return render_template("tacos.html", r=response, m="", c=photos, t=term, l=location)
+
 
 ####################  INSTAGRAM  #######################
 ###Instagram Keys
 
 CONFIG = {
-    'client_id': 'd1ea621e34594ddba981f42614d8b0fc',
-    'client_secret': '3ebafbbe4b224811b18d6823f89fba3e',
-    'redirect_uri': 'http://localhost:8000',
+    'client_id': '1500207b59d34a87a53120d33e56c041',
+    'client_secret': '41ede89cba7e44ecb604fce95f444672',
+    'redirect_uri': 'http://localhost:8000/oauth',
 }
 api = client.InstagramAPI(**CONFIG)
 
 @app.route('/instagram')
 def instagram():
+    '''To receive instagram access code'''
     if 'insta_access_token' not in session:
         return redirect('/conn')
+    else:
+        return redirect('/')
 
 @app.route('/conn')
 def main():
+    '''Redirect from /instagram to get access code'''
     url = api.get_authorize_url(scope=["likes", "comments"])
     return redirect(url)
 
 @app.route('/oauth')
 def oauth():
-    code = request.args.get("token")
-    return "done"
-    if code:
-        access_token, user = api.exchange_code_for_access_token(code)
-        if not access_token:
-            return 'no access token'
-        app.logger.debug('got an access token')
-        app.logger.debug(access_token)
-
-        session['insta_access_token'] = access_token
-        session['insta_user'] = user
-        return redirect('/tag_search')
-
-
-@app.route('/tag_search')
-def tag_search(hashtag):
-    access_token = session['insta_access_token']
-    api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
-    tag_search, next_tag = api.tag_search(q = hashtag)
-    tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
-    photos = []
-    for tag_media in tag_recent_media:
-        photos.append('<img src="%s"/>' % tag_media.get_standard_resolution_url())
-    content += ''.join(photos)
-    return content
-
-def location_search(longi, lati, dist):
-    """Searches for all photos within a given distance of a longitude and latitude.
-    input
-      longi (long): longitude of your place
-      lati (long): latitude of your place
-      dist (long): radius of the search 
-   output 
-      photos (str): photos from within that area
-"""
-    access_token = request.session['access_token']
+    code = request.args.get('code')
+    access_token, user = api.exchange_code_for_access_token(code)
     if not access_token:
-        return 'Missing Access Token'
-    api = client.InstagramAPI(access_token=access_token, client_secret=CONFIG['client_secret'])
-    media_search = api.media_search(lat=lati,lng=longi,distance=dist)
-    pics = []
-    for media in media_search:
-        pics.append('<img src="%s"/>' % media.get_standard_resolution_url())
-    photos += ''.join(pics)
-    return photos
+        return 'no access token'
+    app.logger.debug('got an access token')
+    app.logger.debug(access_token)
 
+    session['insta_access_token'] = access_token
+    session['insta_user'] = user
+    return redirect('/')
 
 if __name__=="__main__":
     app.secret_key = "My name is Taco"

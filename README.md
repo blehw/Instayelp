@@ -20,4 +20,4 @@ Combining the best of Instagram and Yelp to give you what you need in your life:
 <tr>
 <td>Jerry Lei</td>
 </tr>
-</table
+</table>

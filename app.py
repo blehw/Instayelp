@@ -147,7 +147,7 @@ def query_api(term="tacos", location="brooklyn"):
     content = "<h2> Tag Search: %s</h2>" % term
     access_token = session['insta_access_token']
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
-    tag_search, next_tag = api.tag_search(q = "tacos")
+    tag_search, next_tag = api.tag_search(q = term)
     tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
     photos = []
     for tag_media in tag_recent_media:

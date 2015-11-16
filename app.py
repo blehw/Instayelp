@@ -118,7 +118,7 @@ def index():
 def query_api(term="tacos", location="brooklyn"):
     """Queries the API by the input values from the user.
     Args:
-        term (str): The search term to query.
+        term (str): The search term to query. Will return JSON from Instagram of posts tagged with this term.
         location (str): The location of the business to query.
     """
     message = ""
@@ -131,6 +131,7 @@ def query_api(term="tacos", location="brooklyn"):
 	#response = search("pizza", "krpslpo");
     businesses = response.get('businesses')
 	
+    #Yelp part:
     if not businesses:
         print u'No businesses for {0} in {1} found.'.format(term, location)
         session["bussiness_at_location"] = False
@@ -144,7 +145,7 @@ def query_api(term="tacos", location="brooklyn"):
 
     print u'Result for business "{0}" found:'.format(business_id)
     
-    #content = "<h2> Tag Search: %s</h2>" % term
+    #Instagram part:
     access_token = session['insta_access_token']
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
     tag_search, next_tag = api.tag_search(q = term)
@@ -152,13 +153,7 @@ def query_api(term="tacos", location="brooklyn"):
     photos = []
     for tag_media in tag_recent_media:
         photos.append(tag_media.get_standard_resolution_url())
-    #content += ' '.join(photos)
-    
-
     return render_template("tacos.html", r=response, m=message, c=photos, t=term, l=location)
-
-
-
 
 
 ####################  INSTAGRAM  #######################
@@ -173,13 +168,15 @@ api = client.InstagramAPI(**CONFIG)
 
 @app.route('/instagram')
 def instagram():
+    '''To receive instagram access code'''
     if 'insta_access_token' not in session:
         return redirect('/conn')
     else:
-        return '%s' % session['insta_access_token']
+        return redirect('/')
 
 @app.route('/conn')
 def main():
+    '''Redirect from /instagram to get access code'''
     url = api.get_authorize_url(scope=["likes", "comments"])
     return redirect(url)
 

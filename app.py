@@ -4,6 +4,7 @@ import pprint
 import sys
 import urllib
 import oauth2
+import random
 
 from instagram import client, subscriptions
 
@@ -114,46 +115,82 @@ def index():
 		button = request.form['button']
 		food = request.form['type']
 		location =request.form['location']
+		print button
+		if button == "Find Random":
+			return query_api2(term=food, location=location)
 		if button=="Find":
-			return query_api(term=food, location=location);
+			return query_api(term=food, location=location)
 		else:
 		    return "bye"
    	else:
    		return render_template("home.html")
 
-@app.route("/<term>/<location>")
+@app.route("/<term>/<location>", methods=["GET","POST"])
 def query_api(term="tacos", location="brooklyn"):
     """Queries the API by the input values from the user.
     Args:
         term (str): The search term to query.
         location (str): The location of the business to query.
     """
-    message = ""
     if "business_at_location" not in session:
     	session['business_at_location'] = True
 	if not session['business_at_location']:
 		message = "No business at this location"
 		session["business_at_location"] = True
-    response = search(term, location)
-	#response = search("pizza", "krpslpo");
-    businesses = response.get('businesses')
-	
-    if not businesses:
-        print u'No businesses for {0} in {1} found.'.format(term, location)
-        session["bussiness_at_location"] = False
-        return render_template("tacos.html")
-    business_id = businesses[0]['id']
+	button = ""
+    if request.method == "POST":
+    	button = request.form['button']
+    if button != "Find Another":
+    	response = search(term, location)
+    	businesses = response.get('businesses')
+    	business_id = businesses[0]['id']
+    	if not businesses:
+    		print u'No businesses for {0} in {1} found.'.format(term, location)
+    		session["bussiness_at_location"] = False
+    		return render_template("tacos.html")
+    	print u'{0} businesses found, querying business info ' \
+		'for the top result "{1}" ...'.format(len(businesses), business_id)
+    	response = get_business(business_id)
+    	print u'Result for business "{0}" found:'.format(business_id)
+    	return render_template("tacos.html", r=response, m="")
+    else:
+    	print "duck"
+    	response = search(term, location)
+    	businesses = response.get('businesses')
+    	length = len(businesses)
+    	rand = random.randint(0, length - 1)
+    	business_id = businesses[rand]['id']
+    	if not businesses:
+    		print u'No businesses for {0} in {1} found.'.format(term, location)
+    		session["bussiness_at_location"] = False
+    		return render_template("tacos.html")
+		length =len(businesses)
+		rand = random.randint(0, length - 1)
+		print u'{0} businesses found, querying business info ' \
+		'for the top result "{1}" ...'.format(len(businesses), business_id )
+    	response = get_business(business_id )
+    	print u'Result for bussiness "{0}" found:'.format(business_id )
+    	return render_template("tacos.html", r=response, m="")
 
-    print u'{0} businesses found, querying business info ' \
-        'for the top result "{1}" ...'.format(
-            len(businesses), business_id)
-    response = get_business(business_id)
 
-    print u'Result for business "{0}" found:'.format(business_id)
-    return render_template("tacos.html", r=response, m=message)
-
-
-
+def query_api2(term="tacos", location = "brooklyn"):
+	print "duck"
+	response = search(term, location)
+	businesses = response.get('businesses')
+	length = len(businesses)
+	rand = random.randint(0, length - 1)
+	business_id = businesses[rand]['id']
+	if not businesses:
+		print u'No businesses for {0} in {1} found.'.format(term, location)
+		session["bussiness_at_location"] = False
+		return render_template("tacos.html")
+	length =len(businesses)
+	rand = random.randint(0, length - 1)
+	print u'{0} businesses found, querying business info ' \
+	'for the top result "{1}" ...'.format(len(businesses), business_id )
+	response = get_business(business_id )
+	print u'Result for bussiness "{0}" found:'.format(business_id )
+	return render_template("tacos.html", r=response, m="")
 
 ####################  INSTAGRAM  #######################
 ###Instagram Keys

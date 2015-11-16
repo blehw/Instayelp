@@ -144,18 +144,18 @@ def query_api(term="tacos", location="brooklyn"):
 
     print u'Result for business "{0}" found:'.format(business_id)
     
-    content = "<h2> Tag Search: %s</h2>" % term
+    #content = "<h2> Tag Search: %s</h2>" % term
     access_token = session['insta_access_token']
     api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
     tag_search, next_tag = api.tag_search(q = term)
     tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
     photos = []
     for tag_media in tag_recent_media:
-        photos.append('<img src="%s"/>' % tag_media.get_standard_resolution_url())
-    content += ''.join(photos)
+        photos.append(tag_media.get_standard_resolution_url())
+    #content += ' '.join(photos)
     
 
-    return render_template("tacos.html", r=response, m=message, c=content)
+    return render_template("tacos.html", r=response, m=message, c=photos, t=term, l=location)
 
 
 
@@ -195,22 +195,6 @@ def oauth():
     session['insta_access_token'] = access_token
     session['insta_user'] = user
     return redirect('/')
-
-
-@app.route('/tag_search')
-def tag_search():
-    access_token = session['insta_access_token']
-    api = client.InstagramAPI(access_token = access_token, client_secret = CONFIG['client_secret'])
-    tag_search, next_tag = api.tag_search(q = "tacos")
-    tag_recent_media, next = api.tag_recent_media(tag_name=tag_search[0].name)
-    photos = []
-    for tag_media in tag_recent_media:
-        photos.append('<img src="%s"/>' % tag_media.get_standard_resolution_url())
-    content += ''.join(photos)
-    return content
-
-
-
 
 if __name__=="__main__":
     app.secret_key = "My name is Taco"

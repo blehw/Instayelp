@@ -4,7 +4,7 @@
 {% endfor %}-->
 <!DOCTYPE HTML>
 <HTML>
-{{m}}
+<h1>Top for '{{t}}' in '{{l}}':</h1>
 <br>
 Name of Restaurant: {{r['name']}}
 <br>
@@ -15,10 +15,10 @@ Phone: {{r['phone']}}
 Address: {% for x in r['location']['display_address'] %} {{x}} {% endfor %}
 <br>
 <a href={{r['url']}}>Yelp Site</a>
-<br>
-{{c}}
-
-
+<h2>Some deliciously random Instagram posts tagged with '{{t}}'</h2>
+{% for u in c %}
+<br><img src={{u}}>
+{% endfor %}
 
 <form method = "POST">
 	<div class = "containor">
